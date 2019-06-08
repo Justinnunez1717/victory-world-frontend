@@ -1,6 +1,13 @@
 <template>
   <div class="container">
     <h1>Victory World</h1>
+    <div class="create-post">
+      <form v-on:submit="createPost">
+        <label class="small-text" for="create-post">Yell into the void:  </label>
+        <input type="text" id="create" v-model="text">
+        <button >Post</button>
+      </form>
+    </div>
     <hr>
     <p class="error" v-if="error">{{ error }}</p>
     <div class="posts-container">
@@ -9,8 +16,9 @@
         v-bind:item="post"
         v-bind:index="index"
         v-bind:key="post._id"
+        v-on:dblclick="deletePost(post._id)"
       >
-      {{ `${post.createdAt.getDate()}/${post.createdAt.getMonth()}/${post.createdAt.getFullYear()}`}}
+      {{ `${post.createdAt.getMonth()+1}/${post.createdAt.getDate()}/${post.createdAt.getFullYear()}`}}
         <p class="text">{{ post.text }}</p>
       </div>
     </div>
@@ -26,7 +34,7 @@ export default {
     return {
       posts: [],
       error: '',
-      text: ''
+      text: '',
     }
   },
   async created() {
@@ -34,6 +42,16 @@ export default {
       this.posts = await PostService.getPosts();
     } catch (err) {
       this.error = err.message;
+    }
+  },
+  methods: {
+    async createPost() {
+      await PostService.insertPost(this.text);
+      this.posts = await PostService.getPosts();
+    },
+    async deletePost(id) {
+      await PostService.deletePost(id);
+      this.posts = await PostService.getPosts();
     }
   }
 }
@@ -74,6 +92,12 @@ div.created-at {
 p.text {
   font-size: 22px;
   font-weight: 700;
+  margin-bottom: 0;
+}
+
+label.small-text {
+  font-size: 12px;
+  font-weight: 600;
   margin-bottom: 0;
 }
 </style>
